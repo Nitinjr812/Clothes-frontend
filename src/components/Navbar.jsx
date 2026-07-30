@@ -16,9 +16,9 @@ const F_BODY = "'Inter',sans-serif";
 // `to: null` means the page isn't built yet — rendered as a non-navigating label.
 const LINKS = [
   { label: "Dashboard", icon: LayoutDashboard, to: "/dashboard" },
-  { label: "Inventory", icon: Boxes, to: null },
-  { label: "Fraud Shield", icon: ShieldCheck, to: null },
-  { label: "Pricing", icon: Tag, to: null },
+  { label: "Inventory", icon: Boxes, to: "/inventory" },
+  { label: "Fraud Shield", icon: ShieldCheck, to: "/fraud-shield" },
+  { label: "Pricing", icon: Tag, to: "/pricing" },
 ];
 
 function Glass({ children, style = {} }) {

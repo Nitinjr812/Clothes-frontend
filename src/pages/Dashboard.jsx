@@ -315,32 +315,37 @@ function Donut({ data, size = 168, strokeWidth = 24 }) {
   );
 }
 
-/* ---------- Trend bar chart ---------- */
-function TrendBars({ data, accent }) {
+/* ---------- Grouped bar chart (revenue vs profit) ---------- */
+function GroupedBars({ data, colorA, colorB }) {
   const [ref, visible] = useReveal();
-  const max = Math.max(...data.map((d) => d.value));
+  const max = Math.max(...data.map((d) => Math.max(d.a, d.b)));
   return (
-    <div ref={ref} style={{ display: "flex", alignItems: "flex-end", gap: 10, height: 160, padding: "0 4px" }}>
-      {data.map((d, i) => {
-        const isPeak = d.value === max;
-        const h = visible ? (d.value / max) * 100 : 0;
-        return (
-          <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 8, height: "100%", justifyContent: "flex-end" }}>
+    <div ref={ref} style={{ display: "flex", alignItems: "flex-end", gap: 14, height: 170, padding: "0 4px" }}>
+      {data.map((d, i) => (
+        <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 8, height: "100%", justifyContent: "flex-end" }}>
+          <div style={{ display: "flex", alignItems: "flex-end", gap: 4, height: "100%", width: "100%", justifyContent: "center" }}>
             <div
-              title={`${d.label}: ${d.value}`}
+              title={`Revenue: ${d.a}`}
               style={{
-                width: "100%",
-                maxWidth: 30,
-                borderRadius: 7,
-                height: `${h}%`,
-                background: isPeak ? accent : `${accent}45`,
+                width: "38%", maxWidth: 16, borderRadius: "5px 5px 2px 2px",
+                height: visible ? `${(d.a / max) * 100}%` : 0,
+                background: colorA,
                 transition: `height 0.9s cubic-bezier(.22,1,.36,1) ${i * 60}ms`,
               }}
             />
-            <span style={{ fontSize: 11, color: COL.muted, fontFamily: F_MONO }}>{d.label}</span>
+            <div
+              title={`Profit: ${d.b}`}
+              style={{
+                width: "38%", maxWidth: 16, borderRadius: "5px 5px 2px 2px",
+                height: visible ? `${(d.b / max) * 100}%` : 0,
+                background: colorB,
+                transition: `height 0.9s cubic-bezier(.22,1,.36,1) ${i * 60 + 80}ms`,
+              }}
+            />
           </div>
-        );
-      })}
+          <span style={{ fontSize: 11, color: COL.muted, fontFamily: F_MONO }}>{d.label}</span>
+        </div>
+      ))}
     </div>
   );
 }
@@ -388,8 +393,8 @@ const DATA = {
       { label: "Card", value: 18, color: COL.teal, icon: CreditCard },
     ],
     trend: [
-      { label: "10a", value: 18 }, { label: "12p", value: 42 }, { label: "2p", value: 61 },
-      { label: "4p", value: 54 }, { label: "6p", value: 82 }, { label: "8p", value: 96 },
+      { label: "10a", a: 18, b: 5 }, { label: "12p", a: 42, b: 12 }, { label: "2p", a: 61, b: 17 },
+      { label: "4p", a: 54, b: 15 }, { label: "6p", a: 82, b: 24 }, { label: "8p", a: 96, b: 29 },
     ],
     bestSellers: [
       { name: "Men's Slim Denim", meta: "18 sold", pct: 100 },
@@ -416,8 +421,8 @@ const DATA = {
       { label: "Card", value: 19, color: COL.teal, icon: CreditCard },
     ],
     trend: [
-      { label: "Mon", value: 62 }, { label: "Tue", value: 48 }, { label: "Wed", value: 71 },
-      { label: "Thu", value: 55 }, { label: "Fri", value: 83 }, { label: "Sat", value: 97 }, { label: "Sun", value: 76 },
+      { label: "Mon", a: 62, b: 19 }, { label: "Tue", a: 48, b: 14 }, { label: "Wed", a: 71, b: 22 },
+      { label: "Thu", a: 55, b: 16 }, { label: "Fri", a: 83, b: 26 }, { label: "Sat", a: 97, b: 31 }, { label: "Sun", a: 76, b: 23 },
     ],
     bestSellers: [
       { name: "Men's Slim Denim", meta: "96 sold", pct: 100 },
@@ -444,7 +449,7 @@ const DATA = {
       { label: "Card", value: 20, color: COL.teal, icon: CreditCard },
     ],
     trend: [
-      { label: "W1", value: 58 }, { label: "W2", value: 72 }, { label: "W3", value: 64 }, { label: "W4", value: 89 },
+      { label: "W1", a: 58, b: 17 }, { label: "W2", a: 72, b: 23 }, { label: "W3", a: 64, b: 19 }, { label: "W4", a: 89, b: 29 },
     ],
     bestSellers: [
       { name: "Men's Slim Denim", meta: "412 sold", pct: 100 },
@@ -468,11 +473,18 @@ const LOW_STOCK = [
   { name: "Sneakers — Size 9", left: "4 left" },
 ];
 
+const STOCK_BY_CATEGORY = [
+  { name: "Menswear", meta: "34%", pct: 100 },
+  { name: "Womenswear", meta: "28%", pct: 82 },
+  { name: "Footwear", meta: "18%", pct: 53 },
+  { name: "Kids", meta: "12%", pct: 35 },
+  { name: "Accessories", meta: "8%", pct: 24 },
+];
+
 export default function Dashboard() {
   useFonts();
   const isMobile = useMediaQuery("(max-width: 700px)");
   const isTablet = useMediaQuery("(max-width: 980px)");
-  const cols = isMobile ? 1 : isTablet ? 2 : 3;
   const [period, setPeriod] = useState("today");
   const d = DATA[period];
 
@@ -505,7 +517,7 @@ export default function Dashboard() {
               <Sparkles size={12} /> Owner dashboard
             </div>
             <h1 style={{ fontSize: isMobile ? 26 : 34, lineHeight: 1.2, fontFamily: F_DISPLAY, color: COL.text, fontWeight: 600, marginBottom: 6 }}>
-              Namaste, here's your store today.
+              Store overview
             </h1>
             <p style={{ fontSize: 13.5, color: COL.muted, fontFamily: F_MONO }}>{d.dateLabel}</p>
           </div>
@@ -521,11 +533,21 @@ export default function Dashboard() {
         </div>
 
         {/* Trend + split */}
-        <div style={{ display: "grid", gridTemplateColumns: cols === 1 ? "1fr" : "2fr 1fr", gap: 20, marginBottom: 28 }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile || isTablet ? "1fr" : "2fr 1fr", gap: 20, marginBottom: 28 }}>
           <Reveal>
             <Glass style={{ padding: isMobile ? "22px 18px" : "28px 30px" }}>
-              <h3 style={{ fontSize: 16, marginBottom: 20, fontFamily: F_DISPLAY, color: COL.text, fontWeight: 600 }}>Sales trend</h3>
-              <TrendBars data={d.trend} accent={COL.gold} />
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10, marginBottom: 20 }}>
+                <h3 style={{ fontSize: 16, fontFamily: F_DISPLAY, color: COL.text, fontWeight: 600 }}>Revenue vs profit</h3>
+                <div style={{ display: "flex", gap: 16, fontSize: 12, fontFamily: F_BODY, color: COL.muted }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <span style={{ width: 8, height: 8, borderRadius: 2, background: COL.gold }} /> Revenue
+                  </span>
+                  <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <span style={{ width: 8, height: 8, borderRadius: 2, background: COL.sage }} /> Profit
+                  </span>
+                </div>
+              </div>
+              <GroupedBars data={d.trend} colorA={COL.gold} colorB={COL.sage} />
             </Glass>
           </Reveal>
           <Reveal delay={100}>
@@ -548,13 +570,13 @@ export default function Dashboard() {
           </Reveal>
         </div>
 
-        {/* Best sellers / slow movers / low stock */}
-        <div style={{ display: "grid", gridTemplateColumns: `repeat(${cols},1fr)`, gap: 20, marginBottom: 60 }}>
+        {/* Best sellers / slow movers / stock by category / low stock */}
+        <div style={{ display: "grid", gridTemplateColumns: `repeat(${isMobile ? 1 : isTablet ? 2 : 4},1fr)`, gap: 20, marginBottom: 60 }}>
           <Reveal>
-            <Glass style={{ padding: isMobile ? "22px 18px" : "26px 26px", height: "100%" }}>
+            <Glass style={{ padding: isMobile ? "22px 18px" : "24px 24px", height: "100%" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 18 }}>
                 <Flame size={16} color={COL.gold} />
-                <h3 style={{ fontSize: 15.5, fontFamily: F_DISPLAY, color: COL.text, fontWeight: 600 }}>Best sellers</h3>
+                <h3 style={{ fontSize: 15, fontFamily: F_DISPLAY, color: COL.text, fontWeight: 600 }}>Best sellers</h3>
               </div>
               {d.bestSellers.map((p, i) => (
                 <ProductRow key={i} name={p.name} meta={p.meta} pct={p.pct} accent={COL.gold} />
@@ -562,22 +584,33 @@ export default function Dashboard() {
             </Glass>
           </Reveal>
           <Reveal delay={80}>
-            <Glass style={{ padding: isMobile ? "22px 18px" : "26px 26px", height: "100%" }}>
+            <Glass style={{ padding: isMobile ? "22px 18px" : "24px 24px", height: "100%" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 18 }}>
                 <Snowflake size={16} color={COL.teal} />
-                <h3 style={{ fontSize: 15.5, fontFamily: F_DISPLAY, color: COL.text, fontWeight: 600 }}>Slow movers</h3>
+                <h3 style={{ fontSize: 15, fontFamily: F_DISPLAY, color: COL.text, fontWeight: 600 }}>Slow movers</h3>
               </div>
               {d.slowMovers.map((p, i) => (
                 <ProductRow key={i} name={p.name} meta={p.meta} pct={p.pct} accent={COL.teal} />
               ))}
             </Glass>
           </Reveal>
-          <Reveal delay={160}>
-            <Glass style={{ padding: isMobile ? "22px 18px" : "26px 26px", height: "100%" }}>
+          <Reveal delay={140}>
+            <Glass style={{ padding: isMobile ? "22px 18px" : "24px 24px", height: "100%" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 18 }}>
+                <Wallet size={16} color={COL.sage} />
+                <h3 style={{ fontSize: 15, fontFamily: F_DISPLAY, color: COL.text, fontWeight: 600 }}>Stock by category</h3>
+              </div>
+              {STOCK_BY_CATEGORY.map((c, i) => (
+                <ProductRow key={i} name={c.name} meta={c.meta} pct={c.pct} accent={COL.sage} />
+              ))}
+            </Glass>
+          </Reveal>
+          <Reveal delay={200}>
+            <Glass style={{ padding: isMobile ? "22px 18px" : "24px 24px", height: "100%" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <AlertTriangle size={16} color={COL.wine} />
-                  <h3 style={{ fontSize: 15.5, fontFamily: F_DISPLAY, color: COL.text, fontWeight: 600 }}>Low stock alerts</h3>
+                  <h3 style={{ fontSize: 15, fontFamily: F_DISPLAY, color: COL.text, fontWeight: 600 }}>Low stock</h3>
                 </div>
                 <span style={{ fontSize: 11.5, padding: "3px 9px", borderRadius: 999, color: COL.wine, background: `${COL.wine}1a`, fontFamily: F_MONO }}>{LOW_STOCK.length}</span>
               </div>
