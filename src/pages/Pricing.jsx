@@ -2,8 +2,9 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import {
   Check, Sparkles, ChevronDown, Store, TrendingUp, Building2, Eye,
 } from "lucide-react";
-import Navbar from "../components/Navbar.jsx";
+import Navbar from "../components/Navbar.jsx"; 
 import useMediaQuery from "../hooks/useMediaQuery.js";
+
 
 const COL = {
   bg: "#15110E",
