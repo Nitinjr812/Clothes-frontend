@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Eye, Menu, X, LayoutDashboard, Boxes, ShieldCheck, Tag, Users, ChevronRight } from "lucide-react";
+import { Eye, Menu, X, LayoutDashboard, Boxes, ShieldCheck, Tag, Users, Heart, ChevronRight } from "lucide-react";
 import useMediaQuery from "../hooks/useMediaQuery.js";
 
 const COL = {
@@ -18,6 +18,7 @@ const LINKS = [
   { label: "Dashboard", icon: LayoutDashboard, to: "/dashboard" },
   { label: "Inventory", icon: Boxes, to: "/inventory" },
   { label: "Employees", icon: Users, to: "/employees" },
+  { label: "Customers", icon: Heart, to: "/customers" },
   { label: "Fraud Shield", icon: ShieldCheck, to: "/fraud-shield" },
   { label: "Pricing", icon: Tag, to: "/pricing" },
 ];
