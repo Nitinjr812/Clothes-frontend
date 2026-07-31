@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Eye, Menu, X, LayoutDashboard, Boxes, ShieldCheck, Tag, Users, Heart, ChevronRight } from "lucide-react";
-import useMediaQuery from "../hooks/useMediaQuery.js";
+import Usemediaquery from "../hooks/Usemediaquery.js";
 
 const COL = {
   bg: "#15110E",
@@ -67,7 +67,7 @@ function Logo({ size = 30, textSize = 19 }) {
 }
 
 export default function Navbar() {
-  const isMobile = useMediaQuery("(max-width: 860px)");
+  const isMobile = Usemediaquery("(max-width: 860px)");
   const [open, setOpen] = useState(false);
   const location = useLocation();
 

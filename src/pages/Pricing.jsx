@@ -3,7 +3,7 @@ import {
   Check, Sparkles, ChevronDown, Store, TrendingUp, Building2, Eye,
 } from "lucide-react";
 import Navbar from "../components/Navbar.jsx"; 
-import useMediaQuery from "../hooks/useMediaQuery.js";
+import Usemediaquery from "../hooks/Usemediaquery.js";
 
 
 const COL = {
@@ -352,8 +352,8 @@ const FAQS = [
 
 export default function Pricing() {
   useFonts();
-  const isMobile = useMediaQuery("(max-width: 700px)");
-  const isTablet = useMediaQuery("(max-width: 980px)");
+  const isMobile = Usemediaquery("(max-width: 700px)");
+  const isTablet = Usemediaquery("(max-width: 980px)");
   const cols = isMobile ? 1 : isTablet ? 2 : 3;
   const [yearly, setYearly] = useState(false);
   const [openFaq, setOpenFaq] = useState(0);

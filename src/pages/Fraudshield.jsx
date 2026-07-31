@@ -4,7 +4,7 @@ import {
   Camera, Search, AlertTriangle, XCircle, Users, Eye,
 } from "lucide-react";
 import Navbar from "../components/Navbar.jsx";
-import useMediaQuery from "../hooks/useMediaQuery.js";
+import Usemediaquery from "../hooks/Usemediaquery.js";
 
 const COL = {
   bg: "#15110E",
@@ -336,8 +336,8 @@ const SEVERITIES = ["All", "Critical", "Warning", "Info"];
 
 export default function FraudShield() {
   useFonts();
-  const isMobile = useMediaQuery("(max-width: 700px)");
-  const isTablet = useMediaQuery("(max-width: 980px)");
+  const isMobile = Usemediaquery("(max-width: 700px)");
+  const isTablet = Usemediaquery("(max-width: 980px)");
 
   const [rules, setRules] = useState(INITIAL_RULES);
   const [severity, setSeverity] = useState("All");
