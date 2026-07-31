@@ -1,27 +1,21 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "./pages/Home.jsx";
-import Dashboard from "./pages/Dashboard.jsx";
-import Inventory from "./pages/Inventory.jsx";
-import Employees from "./pages/Employees.jsx";
-import Customers from "./pages/Customers.jsx";
-import FraudShield from "./pages/Fraudshield.jsx";
-import Pricing from "./pages/Pricing.jsx";
-import "./App.css";
+import { useEffect } from "react";
+import AOS from "aos";
+import "aos/dist/aos.css";
+import Home from "./pages/Home/Home";
 
+// Routing will be added as more pages come online (POS, Inventory, etc.)
+// via react-router-dom. For now this renders the public landing page.
 function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/inventory" element={<Inventory />} />
-        <Route path="/employees" element={<Employees />} />
-        <Route path="/customers" element={<Customers />} />
-        <Route path="/fraud-shield" element={<FraudShield />} />
-        <Route path="/pricing" element={<Pricing />} />
-      </Routes>
-    </BrowserRouter>
-  );
+  useEffect(() => {
+    AOS.init({
+      duration: 700,
+      easing: "ease-out-cubic",
+      once: true,
+      offset: 60,
+    });
+  }, []);
+
+  return <Home />;
 }
 
 export default App;
