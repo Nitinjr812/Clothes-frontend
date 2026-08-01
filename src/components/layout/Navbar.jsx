@@ -13,9 +13,8 @@ const NAV_LINKS = [
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  // Keeps the drawer mounted (in the DOM) for the duration of the closing
-  // animation, instead of relying purely on opacity/pointer-events, which
-  // is what made the previous version feel like it "snapped" shut.
+  // Keeps the drawer mounted for the duration of the closing animation,
+  // instead of relying purely on opacity/pointer-events (which snaps shut).
   const [menuMounted, setMenuMounted] = useState(false);
 
   useEffect(() => {
@@ -40,6 +39,14 @@ export default function Navbar() {
     // Unmount after the exit transition finishes (matches duration-300 below)
     const t = setTimeout(() => setMenuMounted(false), 300);
     return () => clearTimeout(t);
+  }, [menuOpen]);
+
+  // Close on Escape key
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e) => e.key === "Escape" && setMenuOpen(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, [menuOpen]);
 
   return (
@@ -88,7 +95,7 @@ export default function Navbar() {
 
         <button
           type="button"
-          className="md:hidden relative inline-flex border border-hairline rounded-lg p-1.5 text-ink w-9 h-9 items-center justify-center"
+          className="md:hidden relative inline-flex border border-hairline rounded-lg p-1.5 text-ink w-9 h-9 items-center justify-center z-10"
           aria-label={menuOpen ? "Close menu" : "Open menu"}
           aria-expanded={menuOpen}
           onClick={() => setMenuOpen((v) => !v)}
@@ -109,48 +116,63 @@ export default function Navbar() {
       </div>
 
       {menuMounted && (
-        <div
-          className={`md:hidden absolute top-[76px] left-0 right-0 bg-surface border-b border-hairline px-5 pt-5 pb-6 transition-all duration-300 ease-out ${
-            menuOpen
-              ? "opacity-100 translate-y-0"
-              : "opacity-0 -translate-y-2 pointer-events-none"
-          }`}
-        >
-          <nav className="flex flex-col gap-1 mb-5" aria-label="Mobile">
-            {NAV_LINKS.map((link, i) => (
+        <div className="md:hidden fixed inset-0 z-90">
+          {/* Backdrop */}
+          <div
+            className={`absolute inset-0 bg-void/70 backdrop-blur-sm transition-opacity duration-300 ease-out ${
+              menuOpen ? "opacity-100" : "opacity-0"
+            }`}
+            onClick={() => setMenuOpen(false)}
+            aria-hidden="true"
+          />
+
+          {/* Side drawer panel */}
+          <div
+            className={`absolute top-0 right-0 h-full w-[78%] max-w-[320px] bg-surface border-l border-hairline shadow-[-16px_0_40px_-16px_rgba(0,0,0,0.5)] flex flex-col pt-[76px] px-6 pb-8 transition-transform duration-300 ease-out ${
+              menuOpen ? "translate-x-0" : "translate-x-full"
+            }`}
+            role="dialog"
+            aria-modal="true"
+          >
+            <nav className="flex flex-col gap-1 mt-4 mb-6" aria-label="Mobile">
+              {NAV_LINKS.map((link, i) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className={`text-base text-ink py-3.5 px-1 border-b border-hairline transition-all duration-300 ease-out ${
+                    menuOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"
+                  }`}
+                  style={{ transitionDelay: menuOpen ? `${80 + i * 50}ms` : "0ms" }}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {link.label}
+                </a>
+              ))}
+            </nav>
+
+            <div
+              className={`mt-auto flex flex-col gap-3 transition-all duration-300 ease-out ${
+                menuOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"
+              }`}
+              style={{
+                transitionDelay: menuOpen ? `${80 + NAV_LINKS.length * 50}ms` : "0ms",
+              }}
+            >
               <a
-                key={link.href}
-                href={link.href}
-                className={`text-base text-ink py-3 px-1 border-b border-hairline transition-all duration-300 ease-out ${
-                  menuOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
-                }`}
-                style={{ transitionDelay: menuOpen ? `${i * 40}ms` : "0ms" }}
+                href="#login"
+                className="text-center py-3 rounded-xl border border-hairline-strong text-ink"
                 onClick={() => setMenuOpen(false)}
               >
-                {link.label}
+                Sign in
               </a>
-            ))}
-          </nav>
-          <div
-            className={`flex flex-col gap-3 transition-all duration-300 ease-out ${
-              menuOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
-            }`}
-            style={{ transitionDelay: menuOpen ? `${NAV_LINKS.length * 40}ms` : "0ms" }}
-          >
-            <a
-              href="#login"
-              className="text-center py-3 rounded-xl border border-hairline-strong text-ink"
-              onClick={() => setMenuOpen(false)}
-            >
-              Sign in
-            </a>
-            <a
-              href="#demo"
-              className="text-center py-3 rounded-xl font-medium text-void bg-linear-to-b from-gold-bright to-gold"
-              onClick={() => setMenuOpen(false)}
-            >
-              Book a demo
-            </a>
+              <a
+                href="#demo"
+                className="text-center py-3 rounded-xl font-medium text-void bg-linear-to-b from-gold-bright to-gold"
+                onClick={() => setMenuOpen(false)}
+              >
+                Book a demo
+              </a>
+            </div>
           </div>
         </div>
       )}
