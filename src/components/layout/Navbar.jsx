@@ -50,6 +50,7 @@ export default function Navbar() {
   }, [menuOpen]);
 
   return (
+    <>
     <header
       className={`sticky top-0 z-100 h-[76px] flex items-center backdrop-blur-xl backdrop-saturate-150 border-b transition-colors duration-300 ${
         scrolled
@@ -115,6 +116,8 @@ export default function Navbar() {
         </button>
       </div>
 
+    </header>
+
       {menuMounted && (
         <div className="md:hidden fixed inset-0 z-90">
           {/* Backdrop */}
@@ -176,6 +179,6 @@ export default function Navbar() {
           </div>
         </div>
       )}
-    </header>
+    </>
   );
 }
