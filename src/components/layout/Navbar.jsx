@@ -13,6 +13,10 @@ const NAV_LINKS = [
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  // Keeps the drawer mounted (in the DOM) for the duration of the closing
+  // animation, instead of relying purely on opacity/pointer-events, which
+  // is what made the previous version feel like it "snapped" shut.
+  const [menuMounted, setMenuMounted] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -26,6 +30,16 @@ export default function Navbar() {
     return () => {
       document.body.style.overflow = "";
     };
+  }, [menuOpen]);
+
+  useEffect(() => {
+    if (menuOpen) {
+      setMenuMounted(true);
+      return;
+    }
+    // Unmount after the exit transition finishes (matches duration-300 below)
+    const t = setTimeout(() => setMenuMounted(false), 300);
+    return () => clearTimeout(t);
   }, [menuOpen]);
 
   return (
@@ -74,49 +88,72 @@ export default function Navbar() {
 
         <button
           type="button"
-          className="md:hidden inline-flex border border-hairline rounded-lg p-1.5 text-ink"
+          className="md:hidden relative inline-flex border border-hairline rounded-lg p-1.5 text-ink w-9 h-9 items-center justify-center"
           aria-label={menuOpen ? "Close menu" : "Open menu"}
           aria-expanded={menuOpen}
           onClick={() => setMenuOpen((v) => !v)}
         >
-          {menuOpen ? <HiOutlineX size={22} /> : <HiOutlineMenu size={22} />}
+          <HiOutlineMenu
+            size={22}
+            className={`absolute transition-all duration-300 ${
+              menuOpen ? "opacity-0 rotate-90 scale-75" : "opacity-100 rotate-0 scale-100"
+            }`}
+          />
+          <HiOutlineX
+            size={22}
+            className={`absolute transition-all duration-300 ${
+              menuOpen ? "opacity-100 rotate-0 scale-100" : "opacity-0 -rotate-90 scale-75"
+            }`}
+          />
         </button>
       </div>
 
-      <div
-        className={`md:hidden absolute top-[76px] left-0 right-0 bg-surface border-b border-hairline px-5 pt-5 pb-6 transition-all duration-300 origin-top ${
-          menuOpen
-            ? "opacity-100 scale-y-100 pointer-events-auto"
-            : "opacity-0 scale-y-95 pointer-events-none"
-        }`}
-      >
-        <nav className="flex flex-col gap-1 mb-5" aria-label="Mobile">
-          {NAV_LINKS.map((link) => (
+      {menuMounted && (
+        <div
+          className={`md:hidden absolute top-[76px] left-0 right-0 bg-surface border-b border-hairline px-5 pt-5 pb-6 transition-all duration-300 ease-out ${
+            menuOpen
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 -translate-y-2 pointer-events-none"
+          }`}
+        >
+          <nav className="flex flex-col gap-1 mb-5" aria-label="Mobile">
+            {NAV_LINKS.map((link, i) => (
+              <a
+                key={link.href}
+                href={link.href}
+                className={`text-base text-ink py-3 px-1 border-b border-hairline transition-all duration-300 ease-out ${
+                  menuOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+                }`}
+                style={{ transitionDelay: menuOpen ? `${i * 40}ms` : "0ms" }}
+                onClick={() => setMenuOpen(false)}
+              >
+                {link.label}
+              </a>
+            ))}
+          </nav>
+          <div
+            className={`flex flex-col gap-3 transition-all duration-300 ease-out ${
+              menuOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+            }`}
+            style={{ transitionDelay: menuOpen ? `${NAV_LINKS.length * 40}ms` : "0ms" }}
+          >
             <a
-              key={link.href}
-              href={link.href}
-              className="text-base text-ink py-3 px-1 border-b border-hairline"
+              href="#login"
+              className="text-center py-3 rounded-xl border border-hairline-strong text-ink"
               onClick={() => setMenuOpen(false)}
             >
-              {link.label}
+              Sign in
             </a>
-          ))}
-        </nav>
-        <div className="flex flex-col gap-3">
-          <a
-            href="#login"
-            className="text-center py-3 rounded-xl border border-hairline-strong text-ink"
-          >
-            Sign in
-          </a>
-          <a
-            href="#demo"
-            className="text-center py-3 rounded-xl font-medium text-void bg-linear-to-b from-gold-bright to-gold"
-          >
-            Book a demo
-          </a>
+            <a
+              href="#demo"
+              className="text-center py-3 rounded-xl font-medium text-void bg-linear-to-b from-gold-bright to-gold"
+              onClick={() => setMenuOpen(false)}
+            >
+              Book a demo
+            </a>
+          </div>
         </div>
-      </div>
+      )}
     </header>
   );
 }
